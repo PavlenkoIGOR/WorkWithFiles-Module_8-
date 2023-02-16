@@ -1,6 +1,4 @@
-﻿
-
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
@@ -11,7 +9,7 @@ using System.Threading.Tasks;
 namespace FinalTask
 {
     [Serializable]
-    public class Student
+    class Student
     {
         public string Name
         {
@@ -32,87 +30,38 @@ namespace FinalTask
             DateOfBirth = dateOfBirth;
         }
     }
-    class Program
+    internal class Task4
     {
-        public static void Main()
+        static void Main(string[] args)
         {
-            FolderCreator();
-            FileCreator();
-            Console.ReadKey();
-        }
-        public static void FileCreator()
-        {
+            string[] paths = { @"d:\", "для SF", "exercise", "Students.dat" };
+            string fullFilePath = Path.Combine(paths);
+            string studentsFolder = @"d:\для SF\exercise\Students";
             try
             {
-                Student[] students =
+                DirectoryInfo dir = new DirectoryInfo(studentsFolder);
+                if (!dir.Exists)
                 {
-                    new Student("Евгений", "Группа1", new DateTime(2009, 5, 29)),
-                    new Student("Паша", "Группа1", new DateTime(2007, 5, 29)),
-                    new Student("Ваня", "Группа2", new DateTime(2008, 5, 29)),
-                    new Student("Гриша", "Группа1", new DateTime(2007, 5, 29)),
-                    new Student("Света", "Группа3", new DateTime(2005, 5, 29)),
-                    new Student("Вова", "Группа2", new DateTime(2007, 5, 30)),
-                    new Student("Вася", "Группа3", new DateTime(2007, 5, 30)),
-                    new Student("Кирилл", "Группа2", new DateTime(2007, 5, 30)),
-                    new Student("Жора", "Группа1", new DateTime(2007, 5, 30)),
-                };
-                BinaryFormatter formatter = new BinaryFormatter();
-                // сериализация
-                using (FileStream fs = new FileStream("D:\\для SF\\exercise\\Students.dat", FileMode.OpenOrCreate))
-                {
-                    foreach (Student student in students)
-                    {
-                        formatter.Serialize(fs, students); //данные из Students.dat сериализованы
-                    }
+                    Console.WriteLine("директория создана");
+                    dir.Create();
                 }
-
-                // десериализация
-                using (FileStream fs = new FileStream("D:\\для SF\\exercise\\Students.dat", FileMode.Open))
-                {
-                    foreach (Student student in students)
-                    {
-                        formatter.Deserialize(fs);
-                    }
-                    using (StreamWriter sw1 = new StreamWriter("D:\\для SF\\exercise\\new\\Group1.txt"))
-                        foreach (Student student in students)
-                        {
-                            if (student.Group == "Группа1")
-                                sw1.WriteLine($"Имя: {student.Name} \n\tДата рождения: {student.DateOfBirth} ");
-                        }
-
-                    using (StreamWriter sw2 = new StreamWriter("D:\\для SF\\exercise\\new\\Group2.txt"))
-                        foreach (Student student in students)
-                        {
-                            if (student.Group == "Группа2")
-                                sw2.WriteLine($"Имя: {student.Name} \n\tДата рождения: {student.DateOfBirth} ");
-                        }
-                    using (StreamWriter sw3 = new StreamWriter("D:\\для SF\\exercise\\new\\Group3.txt"))
-                        foreach (Student student in students)
-                        {
-                            if (student.Group == "Группа3")
-                                sw3.WriteLine($"Имя: {student.Name} \n\tДата рождения: {student.DateOfBirth} ");
-                        }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-        }
-        public static void FolderCreator()
-        {
-            try
-            {
-                DirectoryInfo newDirectory = new DirectoryInfo("D:\\для SF\\exercise\\new");
-                if (!newDirectory.Exists)
-                    newDirectory.Create();
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e.Message); //вывод ошибки о несуществующей директории
             }
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            using (var fs = new FileStream(fullFilePath, FileMode.Open))
+            {
+                var students = (Student[])binaryFormatter.Deserialize(fs);
+                foreach (var student in students)
+                {
+                    using (StreamWriter sw = new StreamWriter($"{studentsFolder}\\{student.Group}.txt", false))
+                        sw.WriteLine($"Имя: {student.Name}, Дата рождения: {student.DateOfBirth} ({student.Group})");
+                }
+            } 
         }
     }
-
 }
+
 
